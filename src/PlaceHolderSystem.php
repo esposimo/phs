@@ -34,9 +34,9 @@ use ReflectionFunction;
 
 /**
  *
- * Class PlaceHolderSystem. La classe PlaceHolderSystem permette di creare dei pattern di stringhe con placeholder ai quali
- * saranno sostituiti i valori configurati.
- * I valori dei placeholder possono essere dichiarati sia in formato esplicito che sottoforma di callback
+ * PlaceHolderSystem
+ * PlaceHolderSystem class allow you to create patterns of string with placeholders. It work like a vsprintf() php function
+ * but replace are in {placeholder} format
  * @package smn\phs
  */
 
@@ -44,80 +44,82 @@ class PlaceHolderSystem
 {
 
     /**
-     * Array multidipensionale dove l'indice è il nome di un placeholder, il valore è un array di parametri da passare
-     * alla callback che si occupa di sostituire il placeholder
-     * @var array|string[]
+     * Multidimensional array where index is name of the {placeholder} in the pattern.
+     * Value of every element is an array with parameters for callback function related to {placeholder}
+     * @var array
      */
     protected array $parameters = [];
 
 
     /**
-     * Lista dei placeholder da utilizzare
+     * A pair key/value of placeholder/value. "Value" is an explicit value or a callback function
      * @var array
      */
     protected array $placeholders = [];
 
     /**
-     * Pattern da utilizzare
+     * Pattern to use
      * @var string
      */
     protected string $pattern;
 
     /**
-     * Aggiunge un nuovo placeholder da tenere in considerazione per il rendering finale. Se $override è uguale a true e
-     * $name già esiste, sarà generata una exception
-     * @param string $name
-     * @param mixed $value Può essere un valore o una callback. Alla callback è possibile passare tutti i valori che si desidera.
-     * @param array $parameters
+     * Add a new placeholder. If $name placeholder already exists, it will be overwritten
+     * @param string $name Name of placeholder
+     * @param string|callable $value Value to use for placeholder. It will be a simple value or a callback function
+     * @param array $parameters If you use a callback as a $value, $parameters is an array of parameters to pass to callback
      * @throws PlaceHolderSystemException
      * @throws ReflectionException
      */
-    public function addPlaceHolder(string $name, $value, array $parameters = []) {
-            $this->placeholders[$name] = $value;
-            if (is_callable($value)) {
-                // se il placeholder è una call back, mi vado a vedere i parametri utilizzati e li mappo per $name
-                $reflection = new ReflectionFunction($value);
-                $count = count($reflection->getParameters());
-                if ($count != count($parameters)) {
-                    throw new PlaceHolderSystemException('Il numero dei parametri della callback non coincide con il numero dei parametri riportati');
-                }
-
-                $params = [];
-                // raccolgo i parametri indicati nella callback, e antepongo un $ in quanto nella Clousure così vengono rappresentati i parametri
-                foreach($reflection->getParameters() as $reflectionParameter) {
-                    $params[] = sprintf('$%s', $reflectionParameter->getName());
-                }
-                // inverto chiavi con array, e poi scorro $params e uso ogni suo valore come chiave dei parametri passati in $parameters per mapparli
-                $this->parameters[$name] = array_combine(array_values($params), array_values($parameters));
-
+    public function addPlaceHolder(string $name, $value, array $parameters = [])
+    {
+        $this->placeholders[$name] = $value;
+        if (is_callable($value)) {
+            // se il placeholder è una call back, mi vado a vedere i parametri utilizzati e li mappo per $name
+            $reflection = new ReflectionFunction($value);
+            $count = count($reflection->getParameters());
+            if ($count != count($parameters)) {
+                throw new PlaceHolderSystemException('Il numero dei parametri della callback non coincide con il numero dei parametri riportati');
             }
+
+            $params = [];
+            // raccolgo i parametri indicati nella callback, e antepongo un $ in quanto nella Clousure così vengono rappresentati i parametri
+            foreach ($reflection->getParameters() as $reflectionParameter) {
+                $params[] = sprintf('$%s', $reflectionParameter->getName());
+            }
+            // inverto chiavi con array, e poi scorro $params e uso ogni suo valore come chiave dei parametri passati in $parameters per mapparli
+            $this->parameters[$name] = array_combine(array_values($params), array_values($parameters));
+        }
     }
 
     /**
-     * Verifica se un placeholder è configurato
-     * @param string $name
+     * Return true/false if placeholder $name exists
+     * @param string $name Placeholder name to check
      * @return bool
      */
-    public function hasPlaceHolder(string $name) {
+    public function hasPlaceHolder(string $name)
+    {
         return array_key_exists($name, $this->placeholders);
     }
 
     /**
-     * Restituisce il valore di un placeholder. Se il placeholder non esiste restituisce false
-     * @param string $name
+     * Return a value of placeholder with name $name. If placeholder $name doesn't exists, it will be return false
+     * @param string $name Placeholder name to get
      * @return bool
      */
-    public function getPlaceHolder(string $name) {
+    public function getPlaceHolder(string $name)
+    {
         return ($this->hasPlaceHolder($name)) ? $this->placeholders[$name] : false;
     }
 
     /**
-     * Rimuove un placeholder. Se il placeholder non esiste, lancia una exception
-     * @param string $name
+     * Remove a placeholder $name. If $name doesn't exists, throw an PlaceHolderSystemException
+     * @param string $name Placeholder name to remove
      * @throws PlaceHolderSystemException
      */
 
-    public function removePlaceHolder(string $name) {
+    public function removePlaceHolder(string $name)
+    {
         if (!$this->hasPlaceHolder($name)) {
             throw new PlaceHolderSystemException(sprintf('Il placeholder %s non esiste', $name));
         }
@@ -125,31 +127,34 @@ class PlaceHolderSystem
     }
 
     /**
-     * Restituisce il pattern configurato
+     * Return configured pattern
      * @return string
      */
-    public function getPattern() {
+    public function getPattern()
+    {
         return $this->pattern;
     }
 
     /**
-     * Configura il pattern
+     * Configure pattern
      * @param string $pattern
      */
-    public function setPattern(string $pattern) {
+    public function setPattern(string $pattern)
+    {
         $this->pattern = $pattern;
     }
 
 
     /**
-     *
+     * Return the pattern renderized with placeholder
+     * @return string
      */
-    public function render() {
-
+    public function render()
+    {
         $map = $this->placeholders;
         $string = $this->pattern;
         $pattern_regex = '/{([A-Za-z0-9\.\:_]+)+}/';
-        $return = preg_replace_callback($pattern_regex, function($p) use ($map) {
+        $return = preg_replace_callback($pattern_regex, function ($p) use ($map) {
             $matched = $p[1];
             $positions = array_flip(array_keys($map));
             if (array_key_exists($matched, $positions)) {
@@ -161,10 +166,7 @@ class PlaceHolderSystem
                 return sprintf('%%%s$s', $key);
             }
             return $p[0];
-
         }, $string);
         return vsprintf($return, $map);
-
     }
-
 }
