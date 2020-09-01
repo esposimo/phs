@@ -1,0 +1,22 @@
+{
+  "name": "smn/placeholdersystem",
+  "description": "Placeholder System for PHP",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Simone",
+      "email": "simone.esposito1986@gmail.com"
+    }
+  ],
+  "require": {
+
+  },
+  "autoload": {
+    "psr-4": { "smn\\": "src/" }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "dev-master",
+    "friendsofphp/php-cs-fixer": "dev-master"
+  }
+}
