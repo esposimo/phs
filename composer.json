@@ -22,10 +22,5 @@
   },
   "scripts": {
     "test": "phpunit --bootstrap tests/bootstrap.php --no-configuration tests/"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.0.0"
-    }
   }
 }
