@@ -5,7 +5,7 @@ A simple class for replace value in a string pattern
 
 ## Requirements
 
- - PHP >= 7.0
+ - PHP >= 7.4
  - Composer
 
 ## Installation

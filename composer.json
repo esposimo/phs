@@ -3,6 +3,7 @@
   "description": "Placeholder System for PHP",
   "license": "MIT",
   "homepage": "https://github.com/smnDev/phs",
+  "version": "1.0.0",
   "authors": [
     {
       "name": "Simone",
@@ -12,11 +13,19 @@
   "autoload": {
     "psr-4": { "smn\\phs\\": "src/" }
   },
+  "require": {
+    "php": "^7.4"
+  },
   "require-dev": {
     "phpunit/phpunit": "dev-master",
     "friendsofphp/php-cs-fixer": "dev-master"
   },
   "scripts": {
     "test": "phpunit --bootstrap tests/bootstrap.php --no-configuration tests/"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.0"
+    }
   }
 }
